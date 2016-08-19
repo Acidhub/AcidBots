@@ -32,69 +32,74 @@ unsigned char IRSR;        // right sensor status
 #define E1 3               // Right wheel speed control
 #define E2 11              // Left wheel speed control
 
-unsigned char old_IRSL,old_IRSM,old_IRSR;
-
 void setup() {
-  sensorConfig();
-  motorControlConfig();        // initialization of motor driver shield IO
-  stop_();
+    Serial.begin(9600);
+    sensorConfig();
+    motorControlConfig();  // initialization of motor driver shield IO
+    stop_();
 }
 
-void sensorConfig(void) {      // Sensor pinout config (Shield IO)
- pinMode(IRSensorLeft,INPUT);
- pinMode(IRSensorMiddle,INPUT);
- pinMode(IRSensorRight,INPUT);
+void sensorConfig() {      // Sensor pinout config (Shield IO)
+    pinMode(IRSensorLeft,INPUT);
+    pinMode(IRSensorMiddle,INPUT);
+    pinMode(IRSensorRight,INPUT);
 }
 
-void sensorScan(void) {        // Get sensors status
- IRSL = digitalRead(IRSensorLeft);
- IRSM = digitalRead(IRSensorMiddle);
- IRSR = digitalRead(IRSensorRight);
+void sensorScan() {        // Get sensors status
+    IRSL = digitalRead(IRSensorLeft);
+    IRSM = digitalRead(IRSensorMiddle);
+    IRSR = digitalRead(IRSensorRight);
 }
 
-void motorControlConfig(void) { // Motor pinout config (Shield IO)
-  pinMode(M1, OUTPUT);
-  pinMode(M2, OUTPUT);
-  pinMode(E1, OUTPUT);
-  pinMode(E2, OUTPUT);
+void motorControlConfig() { // Motor pinout config (Shield IO)
+    pinMode(M1, OUTPUT);
+    pinMode(M2, OUTPUT);
+    pinMode(E1, OUTPUT);
+    pinMode(E2, OUTPUT);
 }
 
-void forward(void) {       // Move forward
-  digitalWrite(M1, LOW);   // Both left and right wheel move forward
-  digitalWrite(M2, HIGH);
-  analogWrite(E1, 255);
-  analogWrite(E2, 255);
+void forward() {           // Move forward
+    digitalWrite(M1, LOW); // Both left and right wheel move forward
+    digitalWrite(M2, HIGH);
+    analogWrite(E1, 255);
+    analogWrite(E2, 255);
 }
 
-void backward(void) {          // Move backward
-  digitalWrite(M1, HIGH);  // Both left and right wheel move backward
-  digitalWrite(M2, LOW);
-  analogWrite(E1, 255);
-  analogWrite(E2, 255);
+void backward() {          // Move backward
+    digitalWrite(M1, HIGH);// Both left and right wheel move backward
+    digitalWrite(M2, LOW);
+    analogWrite(E1, 255);
+    analogWrite(E2, 255);
 }
 
-void right(void) {         // Turn right
-  digitalWrite(M1, HIGH);  // Left wheel moves forward
-  digitalWrite(M2, HIGH);  // Right wheel moves backward
-  analogWrite(E1, 255);
-  analogWrite(E2, 150);
+void right() {             // Turn right
+    digitalWrite(M1, HIGH);// Left wheel moves forward
+    digitalWrite(M2, HIGH);// Right wheel moves backward
+    analogWrite(E1, 255);
+    analogWrite(E2, 150);
 }
 
-void left(void) {          // Turn left
-  digitalWrite(M1, LOW);   // Left wheel moves backward
-  digitalWrite(M2, LOW);   // Right wheel moves forward
-  analogWrite(E1, 150);
-  analogWrite(E2, 255);
+void left() {             // Turn left
+    digitalWrite(M1, LOW);// Left wheel moves backward
+    digitalWrite(M2, LOW);// Right wheel moves forward
+    analogWrite(E1, 150);
+    analogWrite(E2, 255);
 }
 
-void stop_(void) {         // Stop
-  analogWrite(E1, 0);      // Useless set motor direction
-  analogWrite(E2, 0);      // Both left and right wheel stop
+void stop_() {           // Stop
+    analogWrite(E1, 0);  // Useless set motor direction
+    analogWrite(E2, 0);  // Both left and right wheel stop
 }
 
 void loop() {
-sensorScan();
-if(IRSL==1&&IRSM==1&&IRSR==1)forward();
-if((IRSL==0&&IRSM==0&&IRSR==1)||(IRSL==0&&IRSM==1&&IRSR==1)||(IRSL==1&&IRSM==0&&IRSR==1))right();
-if((IRSL==0&&IRSM==0&&IRSR==0)||(IRSL==1&&IRSM==0&&IRSR==0)||(IRSL==1&&IRSM==1&&IRSR==0))left();
+    sensorScan();
+    if(IRSL==1&&IRSM==1&&IRSR==1) {
+        forward();
+    }
+    if((IRSL==0&&IRSM==0&&IRSR==1)||(IRSL==0&&IRSM==1&&IRSR==1)||(IRSL==1&&IRSM==0&&IRSR==1)) {
+        right();
+    }
+    if((IRSL==0&&IRSM==0&&IRSR==0)||(IRSL==1&&IRSM==0&&IRSR==0)||(IRSL==1&&IRSM==1&&IRSR==0)) {
+        left();
+    }
 }
