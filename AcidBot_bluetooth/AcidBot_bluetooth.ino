@@ -1,5 +1,5 @@
 /*
-  AcidBot Prototype gamma - Bluetooth controlled car
+  AcidBot Prototype (Bluetooth car) - gamma platform
   Copyright (C) 2016 - Acidhub <contact@acidhub.click>
 
     This program is free software: you can redistribute it and/or modify
@@ -52,7 +52,7 @@ void forward(void) {       // Move forward
   analogWrite(E2, 255);
 }
 
-void backward(void) {          // Move backward
+void backward(void) {      // Move backward
   digitalWrite(M1, HIGH);  // Both left and right wheel move backward
   digitalWrite(M2, LOW);
   analogWrite(E1, 255);
