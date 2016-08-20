@@ -19,6 +19,8 @@
 
 */
 
+#include <Arduino.h> //Now a PlatformIO project :)
+
 #define IRSensorLeft    5  // Left sensor input
 #define IRSensorMiddle  4  // Middle sensor input
 #define IRSensorRight   2  // Right sensor input
@@ -31,13 +33,6 @@ unsigned char IRSR;        // right sensor status
 #define M2 13              // Left wheel
 #define E1 3               // Right wheel speed control
 #define E2 11              // Left wheel speed control
-
-void setup() {
-    Serial.begin(9600);
-    sensorConfig();
-    motorControlConfig();  // initialization of motor driver shield IO
-    stop_();
-}
 
 void sensorConfig() {      // Sensor pinout config (Shield IO)
     pinMode(IRSensorLeft,INPUT);
@@ -89,6 +84,13 @@ void left() {             // Turn left
 void stop_() {           // Stop
     analogWrite(E1, 0);  // Useless set motor direction
     analogWrite(E2, 0);  // Both left and right wheel stop
+}
+
+void setup() {
+    Serial.begin(9600);
+    sensorConfig();
+    motorControlConfig();  // initialization of motor driver shield IO
+    stop_();
 }
 
 void loop() {

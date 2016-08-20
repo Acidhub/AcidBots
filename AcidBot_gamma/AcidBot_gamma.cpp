@@ -19,6 +19,8 @@
 
 */
 
+#include <Arduino.h> //Now a PlatformIO project :)
+
 #define M1 12 // Right wheel
 #define M2 13 // Left wheel
 #define E1 3  // Right wheel speed control
@@ -35,24 +37,16 @@ unsigned char IRSR;        // right sensor status
 int comm;
 int autoMode = 0;
 
-void setup() {
-  Serial.begin(9600);      // Ready for bluetooth data
-  sensorConfig();          // Sensors init
-  motorControlConfig();    // Motor init (Shield IO)
-  accControlConfig();      // Accessories init (lights, horn, etc).
-  stop_();
-}
-
 void accControlConfig() {  // Accessories config (Shield IO)
-  pinMode(A0, OUTPUT);     // Left light
-  pinMode(A1, OUTPUT);     // Right light
+    pinMode(A0, OUTPUT);     // Left light
+    pinMode(A1, OUTPUT);     // Right light
 }
 
 void motorControlConfig() { // Motor pinout config (Shield IO)
-  pinMode(M1, OUTPUT);
-  pinMode(M2, OUTPUT);
-  pinMode(E1, OUTPUT);
-  pinMode(E2, OUTPUT);
+    pinMode(M1, OUTPUT);
+    pinMode(M2, OUTPUT);
+    pinMode(E1, OUTPUT);
+    pinMode(E2, OUTPUT);
 }
 
 void sensorConfig() {      // Sensor pinout config (Shield IO)
@@ -68,46 +62,54 @@ void sensorScan() {        // Get sensors status
 }
 
 void forward(void) {       // Move forward
-  digitalWrite(M1, LOW);   // Both left and right wheel move forward
-  digitalWrite(M2, HIGH);
-  analogWrite(E1, 255);
-  analogWrite(E2, 255);
+    digitalWrite(M1, LOW);   // Both left and right wheel move forward
+    digitalWrite(M2, HIGH);
+    analogWrite(E1, 255);
+    analogWrite(E2, 255);
 }
 
 void backward(void) {      // Move backward
-  digitalWrite(M1, HIGH);  // Both left and right wheel move backward
-  digitalWrite(M2, LOW);
-  analogWrite(E1, 255);
-  analogWrite(E2, 255);
+    digitalWrite(M1, HIGH);  // Both left and right wheel move backward
+    digitalWrite(M2, LOW);
+    analogWrite(E1, 255);
+    analogWrite(E2, 255);
 }
 
 void right(void) {         // Turn right
-  digitalWrite(M1, HIGH);  // Left wheel moves forward
-  digitalWrite(M2, HIGH);  // Right wheel moves backward
-  analogWrite(E1, 255);
-  analogWrite(E2, 150);
+    digitalWrite(M1, HIGH);  // Left wheel moves forward
+    digitalWrite(M2, HIGH);  // Right wheel moves backward
+    analogWrite(E1, 255);
+    analogWrite(E2, 150);
 }
 
 void left(void) {          // Turn left
-  digitalWrite(M1, LOW);   // Left wheel moves backward
-  digitalWrite(M2, LOW);   // Right wheel moves forward
-  analogWrite(E1, 150);
-  analogWrite(E2, 255);
+    digitalWrite(M1, LOW);   // Left wheel moves backward
+    digitalWrite(M2, LOW);   // Right wheel moves forward
+    analogWrite(E1, 150);
+    analogWrite(E2, 255);
 }
 
 void stop_(void) {         // Stop
-  analogWrite(E1, 0);      // Useless set motor direction
-  analogWrite(E2, 0);      // Both left and right wheel stop
+    analogWrite(E1, 0);      // Useless set motor direction
+    analogWrite(E2, 0);      // Both left and right wheel stop
 }
 
 void lightsOn(void) {
-  digitalWrite(A0, HIGH);
-  digitalWrite(A1, HIGH);
+    digitalWrite(A0, HIGH);
+    digitalWrite(A1, HIGH);
 }
 
 void lightsOff(void) {
-  digitalWrite(A0, LOW);
-  digitalWrite(A1, LOW);
+    digitalWrite(A0, LOW);
+    digitalWrite(A1, LOW);
+}
+
+void setup() {
+    Serial.begin(9600);      // Ready for bluetooth data
+    sensorConfig();          // Sensors init
+    motorControlConfig();    // Motor init (Shield IO)
+    accControlConfig();      // Accessories init (lights, horn, etc).
+    stop_();
 }
 
 void loop() {
