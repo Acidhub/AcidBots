@@ -21,7 +21,7 @@
 
 #include <Arduino.h> //Now a PlatformIO project :)
 
-// Motor pinout set
+// Motor pinout set (!= from gamma project)
 #define MA1  5  // motor A-
 #define MA2  6  // motor A+
 #define MB1  10 // motor B-
@@ -43,6 +43,13 @@ void forward(void) {    // move forward
     digitalWrite(MB2, HIGH);
 }
 
+void backward(void) {    // move backward
+    digitalWrite(MA1, HIGH);
+    digitalWrite(MA2, LOW);
+    digitalWrite(MB1, HIGH);
+    digitalWrite(MB2, LOW);
+}
+
 void right(void) {       // turn right
     digitalWrite(MA1, HIGH);
     digitalWrite(MA2, LOW);
@@ -53,13 +60,6 @@ void right(void) {       // turn right
 void left(void) {        // turn left
     digitalWrite(MA1, LOW);
     digitalWrite(MA2, HIGH);
-    digitalWrite(MB1, HIGH);
-    digitalWrite(MB2, LOW);
-}
-
-void backward(void) {    // move backward
-    digitalWrite(MA1, HIGH);
-    digitalWrite(MA2, LOW);
     digitalWrite(MB1, HIGH);
     digitalWrite(MB2, LOW);
 }
@@ -89,6 +89,10 @@ void loop() {
             Serial.print("Forward...");
             forward();
             break;
+        case 'B':
+            Serial.print("Backward...");
+            backward();
+            break;
         case 'R':
             Serial.print("Right...");
             right();
@@ -97,23 +101,19 @@ void loop() {
             Serial.print("Left...");
             left();
             break;
-        case 'B':
-            Serial.print("Backward...");
-            backward();
-            break;
         case 'S':
             Serial.print("Stop!");
             stop_();
             break;
-        case 'W':
+        case 'W': // Front lights
         case 'w':
-        case 'U':
+        case 'U': // Back lights
         case 'u':
-        case 'V':
+        case 'V': // Horn
         case 'v':
-        case 'X':
+        case 'X': // Other
         case 'x':
-            Serial.println("Not implemented yet.");
+            Serial.println("Not implemented in this robot.");
             break;
     }
 }
