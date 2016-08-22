@@ -27,19 +27,18 @@
 #define E1 3                // Right wheel speed control
 #define E2 11               // Left wheel speed control
 
-#define IRSensorLeft 5      // Left sensor input
-#define IRSensorMiddle 4    // Middle sensor input
-#define IRSensorRight 2     // Right sensor input
+#define IRSL 5              // Left sensor input
+#define IRSM 4              // Middle sensor input
+#define IRSR 2              // Right sensor input
 
-LedControl mx=LedControl(A2,A4,A3,1); // MAX7219 pinout
+#define mxClock A4          // MAX7219 pinout
+#define mxCS A3
+#define mxDin A2
 
-unsigned char IRSL;         // left sensor status
-unsigned char IRSM;         // middle sensor status
-unsigned char IRSR;         // right sensor status
-
-int comm;                   // Serial input
-int autoMode = 0;
-double delay_;
+char comm;                  // Serial input
+bool autoMode = 0;
+unsigned long delay_;       // Parallel delay
+LedControl mx=LedControl(mxDin,mxClock,mxCS,1);
 
 void accControlConfig(void) {// Accessories config (Shield IO)
     pinMode(A0, OUTPUT);    // Left light
@@ -54,9 +53,9 @@ void motorControlConfig(void) { // Motor pinout config (Shield IO)
 }
 
 void sensorConfig(void) {   // Sensor pinout config (Shield IO)
-    pinMode(IRSensorLeft,INPUT);
-    pinMode(IRSensorMiddle,INPUT);
-    pinMode(IRSensorRight,INPUT);
+    pinMode(IRSL,INPUT);
+    pinMode(IRSM,INPUT);
+    pinMode(IRSR,INPUT);
 }
 
 void mxConfig(void) {
@@ -65,10 +64,12 @@ void mxConfig(void) {
     mx.clearDisplay(0);     // clear
 }
 
-void sensorScan(void) {     // Get sensors status
-    IRSL = digitalRead(IRSensorLeft);
-    IRSM = digitalRead(IRSensorMiddle);
-    IRSR = digitalRead(IRSensorRight);
+String sensorScan(void) {     // Get sensors status
+    String left, middle, right;
+    left = digitalRead(IRSL);
+    middle = digitalRead(IRSM);
+    right = digitalRead(IRSR);
+    return left + middle + right;
 }
 
 void forward(void) {        // Move forward
@@ -166,7 +167,6 @@ void loop(void) {
         Serial.print(char(comm));
         Serial.print("\nAction:\t\t");
     }
-    faceAnim();
     switch(comm) {
         case 'X':
             Serial.print("Entering autonomous mode");
@@ -179,17 +179,21 @@ void loop(void) {
             break;
     }
     if(autoMode == 1) {
-        sensorScan();
-        if(IRSL==1&&IRSM==1&&IRSR==1) {
+        String IR = sensorScan();
+        if((IR == "111")) {
             forward();
+            faceAnim();
         }
-        if((IRSL==0&&IRSM==0&&IRSR==1)||(IRSL==0&&IRSM==1&&IRSR==1)||(IRSL==1&&IRSM==0&&IRSR==1)) {
+        if((IR == "001")||(IR == "011")||(IR == "101")) {
             right();
+            face("right");
         }
-        if((IRSL==0&&IRSM==0&&IRSR==0)||(IRSL==1&&IRSM==0&&IRSR==0)||(IRSL==1&&IRSM==1&&IRSR==0)) {
+        if((IR == "000")||(IR == "100")||(IR == "110")) {
             left();
+            face("left");
         }
     } else {
+        faceAnim();
         switch (comm) {
             case 'F':
                 Serial.print("Forward...");
