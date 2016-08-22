@@ -60,7 +60,7 @@ void sensorConfig(void) {   // Sensor pinout config (Shield IO)
 
 void mxConfig(void) {
     mx.shutdown(0,false);   // Wake up,
-    mx.setIntensity(0,3);   // set led intensity and
+    mx.setIntensity(0,2);   // set led intensity and
     mx.clearDisplay(0);     // clear
 }
 
@@ -113,42 +113,21 @@ void lightsOff(void) {
     digitalWrite(A1, LOW);
 }
 
-void face(String where) {
+void face(String where = "front") {
     mx.clearDisplay(0);
-    // (0, columm, line(inv), true)
-    mx.setLed(0,1,2,true);
-    mx.setLed(0,2,1,true);
-    mx.setLed(0,3,1,true);
-    mx.setLed(0,4,1,true);
-    mx.setLed(0,5,1,true);
-    mx.setLed(0,6,2,true);
+    byte eyes[3] = {B01100110, B11001100, B00110011};
+    byte smile[2] = {B00111100, B01000010};
+    mx.setColumn(0,1,smile[0]);
+    mx.setColumn(0,2,smile[1]);
     if(where == "front") {
-        mx.setLed(0,1,6,true);
-        mx.setLed(0,2,6,true);
-        mx.setLed(0,1,5,true);
-        mx.setLed(0,2,5,true);
-        mx.setLed(0,5,6,true);
-        mx.setLed(0,6,6,true);
-        mx.setLed(0,5,5,true);
-        mx.setLed(0,6,5,true);
+        mx.setColumn(0,5,eyes[0]);
+        mx.setColumn(0,6,eyes[0]);
     } else if(where == "left") {
-        mx.setLed(0,2,6,true);
-        mx.setLed(0,3,6,true);
-        mx.setLed(0,2,5,true);
-        mx.setLed(0,3,5,true);
-        mx.setLed(0,6,6,true);
-        mx.setLed(0,7,6,true);
-        mx.setLed(0,6,5,true);
-        mx.setLed(0,7,5,true);
+        mx.setColumn(0,5,eyes[1]);
+        mx.setColumn(0,6,eyes[1]);
     } else if(where == "right") {
-        mx.setLed(0,0,6,true);
-        mx.setLed(0,1,6,true);
-        mx.setLed(0,0,5,true);
-        mx.setLed(0,1,5,true);
-        mx.setLed(0,4,6,true);
-        mx.setLed(0,5,6,true);
-        mx.setLed(0,4,5,true);
-        mx.setLed(0,5,5,true);
+        mx.setColumn(0,5,eyes[2]);
+        mx.setColumn(0,6,eyes[2]);
     }
 }
 
@@ -158,8 +137,8 @@ void setup(void) {
     motorControlConfig();   // Motor init (Shield IO)
     accControlConfig();     // Accessories init (lights, horn, etc).
     mxConfig();             // Led matrix init
-    face("front");
     stop_();
+    face();
 }
 
 void loop(void) {
