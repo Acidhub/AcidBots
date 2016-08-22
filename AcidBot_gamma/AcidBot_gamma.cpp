@@ -39,6 +39,7 @@ unsigned char IRSR;         // right sensor status
 
 int comm;                   // Serial input
 int autoMode = 0;
+double delay_;
 
 void accControlConfig(void) {// Accessories config (Shield IO)
     pinMode(A0, OUTPUT);    // Left light
@@ -115,8 +116,10 @@ void lightsOff(void) {
 
 void face(String where = "front") {
     mx.clearDisplay(0);
+
     byte eyes[3] = {B01100110, B11001100, B00110011};
     byte smile[2] = {B00111100, B01000010};
+
     mx.setColumn(0,1,smile[0]);
     mx.setColumn(0,2,smile[1]);
     if(where == "front") {
@@ -128,6 +131,18 @@ void face(String where = "front") {
     } else if(where == "right") {
         mx.setColumn(0,5,eyes[2]);
         mx.setColumn(0,6,eyes[2]);
+    } else if(where == "blink") {
+        mx.setColumn(0,5,eyes[0]);
+    }
+}
+
+void faceAnim(void) {
+    delay_++;
+    if(delay_ == 150000) {
+        face("blink");
+    } else if(delay_ == 160000) {
+        face();
+        delay_ = 0;
     }
 }
 
@@ -148,6 +163,7 @@ void loop(void) {
         Serial.print(char(comm));
         Serial.print("\nAction:\t\t");
     }
+    faceAnim();
     switch(comm) {
         case 'X':
             Serial.print("Entering autonomous mode");
