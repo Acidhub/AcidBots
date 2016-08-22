@@ -31,13 +31,14 @@
 #define IRSensorMiddle 4    // Middle sensor input
 #define IRSensorRight 2     // Right sensor input
 
+LedControl mx=LedControl(A2,A4,A3,1); // MAX7219 pinout
+
 unsigned char IRSL;         // left sensor status
 unsigned char IRSM;         // middle sensor status
 unsigned char IRSR;         // right sensor status
 
 int comm;                   // Serial input
 int autoMode = 0;
-int where = 'f';            // Eye/face direction
 
 void accControlConfig(void) {// Accessories config (Shield IO)
     pinMode(A0, OUTPUT);    // Left light
@@ -58,7 +59,6 @@ void sensorConfig(void) {   // Sensor pinout config (Shield IO)
 }
 
 void mxConfig(void) {
-    LedControl mx=LedControl(A2,A4,A3,1);
     mx.shutdown(0,false);   // Wake up,
     mx.setIntensity(0,3);   // set led intensity and
     mx.clearDisplay(0);     // clear
@@ -113,12 +113,52 @@ void lightsOff(void) {
     digitalWrite(A1, LOW);
 }
 
+void face(String where) {
+    mx.clearDisplay(0);
+    // (0, columm, line(inv), true)
+    mx.setLed(0,1,2,true);
+    mx.setLed(0,2,1,true);
+    mx.setLed(0,3,1,true);
+    mx.setLed(0,4,1,true);
+    mx.setLed(0,5,1,true);
+    mx.setLed(0,6,2,true);
+    if(where == "front") {
+        mx.setLed(0,1,6,true);
+        mx.setLed(0,2,6,true);
+        mx.setLed(0,1,5,true);
+        mx.setLed(0,2,5,true);
+        mx.setLed(0,5,6,true);
+        mx.setLed(0,6,6,true);
+        mx.setLed(0,5,5,true);
+        mx.setLed(0,6,5,true);
+    } else if(where == "left") {
+        mx.setLed(0,2,6,true);
+        mx.setLed(0,3,6,true);
+        mx.setLed(0,2,5,true);
+        mx.setLed(0,3,5,true);
+        mx.setLed(0,6,6,true);
+        mx.setLed(0,7,6,true);
+        mx.setLed(0,6,5,true);
+        mx.setLed(0,7,5,true);
+    } else if(where == "right") {
+        mx.setLed(0,0,6,true);
+        mx.setLed(0,1,6,true);
+        mx.setLed(0,0,5,true);
+        mx.setLed(0,1,5,true);
+        mx.setLed(0,4,6,true);
+        mx.setLed(0,5,6,true);
+        mx.setLed(0,4,5,true);
+        mx.setLed(0,5,5,true);
+    }
+}
+
 void setup(void) {
     Serial.begin(9600);     // Ready for bluetooth data
     sensorConfig();         // Sensors init
     motorControlConfig();   // Motor init (Shield IO)
     accControlConfig();     // Accessories init (lights, horn, etc).
     mxConfig();             // Led matrix init
+    face("front");
     stop_();
 }
 
@@ -156,14 +196,17 @@ void loop(void) {
             case 'F':
                 Serial.print("Forward...");
                 forward();
+                face("front");
                 break;
             case 'R':
                 Serial.print("Right...");
                 right();
+                face("right");
                 break;
             case 'L':
                 Serial.print("Left...");
                 left();
+                face("left");
                 break;
             case 'B':
                 Serial.print("Backward...");
