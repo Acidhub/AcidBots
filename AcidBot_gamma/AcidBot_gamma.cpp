@@ -20,6 +20,7 @@
 */
 
 #include <Arduino.h>
+#include <LedControl.h>     // Matrix MAX7219 lib
 
 #define M1 12               // Right wheel
 #define M2 13               // Left wheel
@@ -36,6 +37,7 @@ unsigned char IRSR;         // right sensor status
 
 int comm;                   // Serial input
 int autoMode = 0;
+int where = 'f';            // Eye/face direction
 
 void accControlConfig(void) {// Accessories config (Shield IO)
     pinMode(A0, OUTPUT);    // Left light
@@ -53,6 +55,13 @@ void sensorConfig(void) {   // Sensor pinout config (Shield IO)
     pinMode(IRSensorLeft,INPUT);
     pinMode(IRSensorMiddle,INPUT);
     pinMode(IRSensorRight,INPUT);
+}
+
+void mxConfig(void) {
+    LedControl mx=LedControl(12,11,10,1);
+    mx.shutdown(0,false);   // Wake up,
+    mx.setIntensity(0,3);   // set led intensity and
+    mx.clearDisplay(0);     // clear
 }
 
 void sensorScan(void) {     // Get sensors status
@@ -109,6 +118,7 @@ void setup(void) {
     sensorConfig();         // Sensors init
     motorControlConfig();   // Motor init (Shield IO)
     accControlConfig();     // Accessories init (lights, horn, etc).
+    mxConfig();             // Led matrix init
     stop_();
 }
 
