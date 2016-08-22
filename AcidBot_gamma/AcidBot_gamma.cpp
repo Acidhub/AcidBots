@@ -37,7 +37,7 @@
 
 char comm;                  // Serial input
 bool autoMode = 0;
-unsigned long delay_;       // Parallel delay
+long delay_;                // Parallel delay
 LedControl mx=LedControl(mxDin,mxClock,mxCS,1);
 
 void accControlConfig(void) {// Accessories config (Shield IO)
@@ -130,19 +130,28 @@ void face(char where = 'F') {
             mx.setColumn(0,5,eyes[0]);
             mx.setColumn(0,6,clear);
             break;
+        case 'O':
+            mx.setColumn(0,5,eyes[0]);
+            mx.setColumn(0,6,eyes[0]);
+            mx.setColumn(0,0,mouth[2]);
+            mx.setColumn(0,1,mouth[3]);
+            mx.setColumn(0,2,mouth[3]);
+            mx.setColumn(0,3,mouth[2]);
+            break;
     }
 }
 
-void faceAnim(void) {
+void faceAnim(int a = 1) {
     delay_++;
-    if(delay_ == 150000) face('B');
-    else if(delay_ == 160000) face();
-    else if(delay_ == 170000) face('B');
-    else if(delay_ == 180000) face();
-    else if(delay_ == 280000) face('L');
-    else if(delay_ == 300000) face();
-    else if(delay_ == 310000) face('R');
-    else if(delay_ == 340000) {
+
+    if(delay_ == 15000/a) face('B');
+    else if(delay_ == 16000/a) face();
+    else if(delay_ == 17000/a) face('B');
+    else if(delay_ == 18000/a) face();
+    else if(delay_ == 28000/a) face('L');
+    else if(delay_ == 30000/a) face();
+    else if(delay_ == 31000/a) face('R');
+    else if(delay_ == 34000/a) {
         face();
         delay_ = 0;
     }
@@ -165,25 +174,37 @@ void loop(void) {
         Serial.print(char(comm));
         Serial.print("\nAction:\t\t");
     }
-    if(autoMode == 1) {
-        char IR[4];
-        snprintf(IR, 4, "%d%d%d", digitalRead(IRSL),
-                                  digitalRead(IRSM),
-                                  digitalRead(IRSR));
 
-        if(strcmp(IR, "111") == 0) {
-            move('F');
-            faceAnim();
-        } else if(strcmp(IR, "001") == 0 ||
-                  strcmp(IR, "011") == 0 ||
-                  strcmp(IR, "101") == 0) {
-            move('R');
-            face('R');
-        } else if(strcmp(IR, "000") == 0 ||
-                  strcmp(IR, "100") == 0 ||
-                  strcmp(IR, "110") == 0) {
-            move('L');
-            face('R');
+    switch(comm) {
+        case 'X':
+            Serial.print("Entering autonomous mode");
+            autoMode = 1;
+            break;
+        case 'x':
+            Serial.print("Leaving autonomous mode");
+            move('S');
+            autoMode = 0;
+            break;
+    }
+
+    if(autoMode == 1) {
+        char IRL = digitalRead(IRSL);
+        char IRM = digitalRead(IRSM);
+        char IRR = digitalRead(IRSR);
+
+        if((IRL==0&&IRM==0&&IRR==1) ||
+           (IRL==0&&IRM==1&&IRR==1) ||
+           (IRL==1&&IRM==0&&IRR==1)) {
+            move('R', 0);
+            face('O');
+        } else if((IRL==0&&IRM==0&&IRR==0) ||
+                  (IRL==1&&IRM==0&&IRR==0) ||
+                  (IRL==1&&IRM==1&&IRR==0)) {
+            move('L', 0);
+            face('O');
+        } else {
+            move('F', 0);
+            faceAnim(30);
         }
     } else {
         faceAnim();
@@ -223,15 +244,6 @@ void loop(void) {
             case 'V':
             case 'v':
                 Serial.println("Not implemented yet.");
-                break;
-            case 'X':
-                Serial.print("Entering autonomous mode");
-                autoMode = 1;
-                break;
-            case 'x':
-                Serial.print("Leaving autonomous mode");
-                move('S');
-                autoMode = 0;
                 break;
         }
     }
