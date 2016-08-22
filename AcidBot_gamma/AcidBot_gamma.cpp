@@ -36,7 +36,7 @@
 #define mxDin A2
 
 char comm;                  // Serial input
-bool autoMode = 0;
+bool autoMode = 1;
 unsigned long delay_;       // Parallel delay
 LedControl mx=LedControl(mxDin,mxClock,mxCS,1);
 
@@ -62,14 +62,6 @@ void mxConfig(void) {
     mx.shutdown(0,false);   // Wake up,
     mx.setIntensity(0,2);   // set led intensity and
     mx.clearDisplay(0);     // clear
-}
-
-String sensorScan(void) {     // Get sensors status
-    String left, middle, right;
-    left = digitalRead(IRSL);
-    middle = digitalRead(IRSM);
-    right = digitalRead(IRSR);
-    return left + middle + right;
 }
 
 void forward(void) {        // Move forward
@@ -179,16 +171,22 @@ void loop(void) {
             break;
     }
     if(autoMode == 1) {
-        String IR = sensorScan();
-        if((IR == "111")) {
+        char IR[4];
+        snprintf(IR, 4, "%d%d%d", digitalRead(IRSL),
+                                  digitalRead(IRSM),
+                                  digitalRead(IRSR));
+
+        if(strcmp(IR, "111") == 0) {
             forward();
             faceAnim();
-        }
-        if((IR == "001")||(IR == "011")||(IR == "101")) {
+        } else if(strcmp(IR, "001") == 0 ||
+                  strcmp(IR, "011") == 0 ||
+                  strcmp(IR, "101") == 0) {
             right();
             face("right");
-        }
-        if((IR == "000")||(IR == "100")||(IR == "110")) {
+        } else if(strcmp(IR, "000") == 0 ||
+                  strcmp(IR, "100") == 0 ||
+                  strcmp(IR, "110") == 0) {
             left();
             face("left");
         }
