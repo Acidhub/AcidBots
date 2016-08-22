@@ -21,13 +21,13 @@
 
 #include <Arduino.h> //Now a PlatformIO project :)
 
-#define SensorLeft    10 // Left sensor input
-#define SensorMiddle  9  // Middle sensor input
-#define SensorRight   8  // Right sensor input
+#define LSensorLeft    8 // Left sensor input
+#define LSensorMiddle  7  // Middle sensor input
+#define LSensorRight   6  // Right sensor input
 
-unsigned char SL;        // Left sensor status
-unsigned char SM;        // Middle sensor status
-unsigned char SR;        // Right sensor status
+unsigned char LSL;        // Left sensor status
+unsigned char LSM;        // Middle sensor status
+unsigned char LSR;        // Right sensor status
 
 #define M1 12            // Right wheel
 #define M2 13            // Left wheel
@@ -35,15 +35,15 @@ unsigned char SR;        // Right sensor status
 #define E2 11            // Left wheel speed control
 
 void sensorConfig(void) {
-    pinMode(SensorLeft,INPUT);
-    pinMode(SensorMiddle,INPUT);
-    pinMode(SensorRight,INPUT);
+    pinMode(LSensorLeft,INPUT);
+    pinMode(LSensorMiddle,INPUT);
+    pinMode(LSensorRight,INPUT);
 }
 
 void sensorScan(void) {
-    SL = digitalRead(SensorLeft);
-    SM = digitalRead(SensorMiddle);
-    SR = digitalRead(SensorRight);
+    LSL = digitalRead(LSensorLeft);
+    LSM = digitalRead(LSensorMiddle);
+    LSR = digitalRead(LSensorRight);
 }
 
 void motorControlConfig(void) { // Motor pinout config (Shield IO)
@@ -94,13 +94,13 @@ void setup() {
 
 void loop() {
     sensorScan();
-    if((SL==1&&SM==1&&SR==1)||(SL==1&&SM==1&&SR==0)||(SL==0&&SM==1&&SR==1)||(SL==0&&SM==1&&SR==0)) {
+    if((LSL==1&&LSM==1&&LSR==1)||(LSL==1&&LSM==1&&LSR==0)||(LSL==0&&LSM==1&&LSR==1)||(LSL==0&&LSM==1&&LSR==0)) {
         forward();
     }
-    if((SL==0&&SM==0&&SR==0)||(SL==0&&SM==0&&SR==1)) {
+    if((LSL==0&&LSM==0&&LSR==0)||(LSL==0&&LSM==0&&LSR==1)) {
         left();
     }
-    if(SL==1&&SM==0&&SR==0) {
+    if(LSL==1&&LSM==0&&LSR==0) {
         right();
     }
 }

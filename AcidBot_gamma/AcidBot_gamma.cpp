@@ -58,7 +58,7 @@ void sensorConfig(void) {   // Sensor pinout config (Shield IO)
 }
 
 void mxConfig(void) {
-    LedControl mx=LedControl(12,11,10,1);
+    LedControl mx=LedControl(A2,A4,A3,1);
     mx.shutdown(0,false);   // Wake up,
     mx.setIntensity(0,3);   // set led intensity and
     mx.clearDisplay(0);     // clear
