@@ -19,79 +19,79 @@
 
 */
 
-#include <Arduino.h> //Now a PlatformIO project :)
+#include <Arduino.h>
 
-#define M1 12 // Right wheel
-#define M2 13 // Left wheel
-#define E1 3  // Right wheel speed control
-#define E2 11 // Left wheel speed control
+#define M1 12               // Right wheel
+#define M2 13               // Left wheel
+#define E1 3                // Right wheel speed control
+#define E2 11               // Left wheel speed control
 
-#define IRSensorLeft    5  // Left sensor input
-#define IRSensorMiddle  4  // Middle sensor input
-#define IRSensorRight   2  // Right sensor input
+#define IRSensorLeft 5      // Left sensor input
+#define IRSensorMiddle 4    // Middle sensor input
+#define IRSensorRight 2     // Right sensor input
 
-unsigned char IRSL;        // left sensor status
-unsigned char IRSM;        // middle sensor status
-unsigned char IRSR;        // right sensor status
+unsigned char IRSL;         // left sensor status
+unsigned char IRSM;         // middle sensor status
+unsigned char IRSR;         // right sensor status
 
-int comm;
+int comm;                   // Serial input
 int autoMode = 0;
 
-void accControlConfig() {  // Accessories config (Shield IO)
-    pinMode(A0, OUTPUT);     // Left light
-    pinMode(A1, OUTPUT);     // Right light
+void accControlConfig(void) {// Accessories config (Shield IO)
+    pinMode(A0, OUTPUT);    // Left light
+    pinMode(A1, OUTPUT);    // Right light
 }
 
-void motorControlConfig() { // Motor pinout config (Shield IO)
+void motorControlConfig(void) { // Motor pinout config (Shield IO)
     pinMode(M1, OUTPUT);
     pinMode(M2, OUTPUT);
     pinMode(E1, OUTPUT);
     pinMode(E2, OUTPUT);
 }
 
-void sensorConfig() {      // Sensor pinout config (Shield IO)
+void sensorConfig(void) {   // Sensor pinout config (Shield IO)
     pinMode(IRSensorLeft,INPUT);
     pinMode(IRSensorMiddle,INPUT);
     pinMode(IRSensorRight,INPUT);
 }
 
-void sensorScan() {        // Get sensors status
+void sensorScan(void) {     // Get sensors status
     IRSL = digitalRead(IRSensorLeft);
     IRSM = digitalRead(IRSensorMiddle);
     IRSR = digitalRead(IRSensorRight);
 }
 
-void forward(void) {       // Move forward
-    digitalWrite(M1, LOW);   // Both left and right wheel move forward
+void forward(void) {        // Move forward
+    digitalWrite(M1, LOW);  // Both left and right wheel move forward
     digitalWrite(M2, HIGH);
     analogWrite(E1, 255);
     analogWrite(E2, 255);
 }
 
-void backward(void) {      // Move backward
-    digitalWrite(M1, HIGH);  // Both left and right wheel move backward
+void backward(void) {       // Move backward
+    digitalWrite(M1, HIGH); // Both left and right wheel move backward
     digitalWrite(M2, LOW);
     analogWrite(E1, 255);
     analogWrite(E2, 255);
 }
 
-void right(void) {         // Turn right
-    digitalWrite(M1, HIGH);  // Left wheel moves forward
-    digitalWrite(M2, HIGH);  // Right wheel moves backward
+void right(void) {          // Turn right
+    digitalWrite(M1, HIGH); // Left wheel moves forward
+    digitalWrite(M2, HIGH); // Right wheel moves backward
     analogWrite(E1, 255);
     analogWrite(E2, 150);
 }
 
-void left(void) {          // Turn left
-    digitalWrite(M1, LOW);   // Left wheel moves backward
-    digitalWrite(M2, LOW);   // Right wheel moves forward
+void left(void) {           // Turn left
+    digitalWrite(M1, LOW);  // Left wheel moves backward
+    digitalWrite(M2, LOW);  // Right wheel moves forward
     analogWrite(E1, 150);
     analogWrite(E2, 255);
 }
 
-void stop_(void) {         // Stop
-    analogWrite(E1, 0);      // Useless set motor direction
-    analogWrite(E2, 0);      // Both left and right wheel stop
+void stop_(void) {          // Stop
+    analogWrite(E1, 0);     // Useless set motor direction
+    analogWrite(E2, 0);     // Both left and right wheel stop
 }
 
 void lightsOn(void) {
@@ -104,17 +104,17 @@ void lightsOff(void) {
     digitalWrite(A1, LOW);
 }
 
-void setup() {
-    Serial.begin(9600);      // Ready for bluetooth data
-    sensorConfig();          // Sensors init
-    motorControlConfig();    // Motor init (Shield IO)
-    accControlConfig();      // Accessories init (lights, horn, etc).
+void setup(void) {
+    Serial.begin(9600);     // Ready for bluetooth data
+    sensorConfig();         // Sensors init
+    motorControlConfig();   // Motor init (Shield IO)
+    accControlConfig();     // Accessories init (lights, horn, etc).
     stop_();
 }
 
-void loop() {
-    comm = Serial.read(); // Get bluetooth/serial input
-    if (comm != -1) {     // If not "nothing", echo received input
+void loop(void) {
+    comm = Serial.read();   // Get bluetooth/serial input
+    if (comm != -1) {       // If not "nothing", echo received input
         Serial.print("\nReceived:\t");
         Serial.print(char(comm));
         Serial.print("\nAction:\t\t");
