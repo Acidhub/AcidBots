@@ -36,7 +36,7 @@
 #define mxDin A2
 
 char comm;                  // Serial input
-bool autoMode = 1;
+bool autoMode = 0;
 unsigned long delay_;       // Parallel delay
 LedControl mx=LedControl(mxDin,mxClock,mxCS,1);
 
@@ -64,37 +64,32 @@ void mxConfig(void) {
     mx.clearDisplay(0);     // clear
 }
 
-void forward(void) {        // Move forward
-    digitalWrite(M1, LOW);  // Both left and right wheel move forward
-    digitalWrite(M2, HIGH);
-    analogWrite(E1, 255);
-    analogWrite(E2, 255);
-}
+void move(char direction, unsigned char speed = 255) {
+    analogWrite(E1, speed);
+    analogWrite(E2, speed);
 
-void backward(void) {       // Move backward
-    digitalWrite(M1, HIGH); // Both left and right wheel move backward
-    digitalWrite(M2, LOW);
-    analogWrite(E1, 255);
-    analogWrite(E2, 255);
-}
-
-void right(void) {          // Turn right
-    digitalWrite(M1, HIGH); // Left wheel moves forward
-    digitalWrite(M2, HIGH); // Right wheel moves backward
-    analogWrite(E1, 255);
-    analogWrite(E2, 150);
-}
-
-void left(void) {           // Turn left
-    digitalWrite(M1, LOW);  // Left wheel moves backward
-    digitalWrite(M2, LOW);  // Right wheel moves forward
-    analogWrite(E1, 150);
-    analogWrite(E2, 255);
-}
-
-void stop_(void) {          // Stop
-    analogWrite(E1, 0);     // Useless set motor direction
-    analogWrite(E2, 0);     // Both left and right wheel stop
+    switch(direction) {
+        case 'F':
+            digitalWrite(M1, LOW);  // Both left and right wheel move forward
+            digitalWrite(M2, HIGH);
+            break;
+        case 'B':
+            digitalWrite(M1, HIGH); // Both left and right wheel move backward
+            digitalWrite(M2, LOW);
+            break;
+        case 'L':
+            digitalWrite(M1, HIGH); // Left wheel moves forward
+            digitalWrite(M2, HIGH); // Right wheel moves backward
+            break;
+        case 'R':
+            digitalWrite(M1, LOW);  // Left wheel moves backward
+            digitalWrite(M2, LOW);  // Right wheel moves forward
+            break;
+        case 'S':
+            analogWrite(E1, 0);     // Useless set motor direction
+            analogWrite(E2, 0);     // Both left and right wheel stop
+            break;
+    }
 }
 
 void lightsOn(void) {
@@ -107,36 +102,47 @@ void lightsOff(void) {
     digitalWrite(A1, LOW);
 }
 
-void face(String where = "front") {
-    mx.clearDisplay(0);
-
+void face(char where = 'F') {
+    byte clear = B00000000;
     byte eyes[3] = {B01100110, B11001100, B00110011};
-    byte smile[2] = {B00111100, B01000010};
+    byte mouth[4] = {B00111100, B01000010,  // Smile
+                     B00011000, B00100100}; // 'o'
 
-    mx.setColumn(0,1,smile[0]);
-    mx.setColumn(0,2,smile[1]);
-    if(where == "front") {
-        mx.setColumn(0,5,eyes[0]);
-        mx.setColumn(0,6,eyes[0]);
-    } else if(where == "left") {
-        mx.setColumn(0,5,eyes[1]);
-        mx.setColumn(0,6,eyes[1]);
-    } else if(where == "right") {
-        mx.setColumn(0,5,eyes[2]);
-        mx.setColumn(0,6,eyes[2]);
-    } else if(where == "blink") {
-        mx.setColumn(0,5,eyes[0]);
+    mx.setColumn(0,0,clear);
+    mx.setColumn(0,1,mouth[0]);
+    mx.setColumn(0,2,mouth[1]);
+    mx.setColumn(0,3,clear);
+
+    switch(where) {
+        case 'F':
+            mx.setColumn(0,5,eyes[0]);
+            mx.setColumn(0,6,eyes[0]);
+            break;
+        case 'L':
+            mx.setColumn(0,5,eyes[1]);
+            mx.setColumn(0,6,eyes[1]);
+            break;
+        case 'R':
+            mx.setColumn(0,5,eyes[2]);
+            mx.setColumn(0,6,eyes[2]);
+            break;
+        case 'B':
+            mx.setColumn(0,5,eyes[0]);
+            mx.setColumn(0,6,clear);
+            break;
     }
 }
 
 void faceAnim(void) {
     delay_++;
-    if(delay_ == 150000) face("blink");
+    if(delay_ == 150000) face('B');
     else if(delay_ == 160000) face();
-    else if(delay_ == 220000) face("left");
-    else if(delay_ == 230000) face("front");
-    else if(delay_ == 232000) face("right");
-    else if(delay_ == 242000) {
+    else if(delay_ == 170000) face('B');
+    else if(delay_ == 180000) face();
+    else if(delay_ == 280000) face('L');
+    else if(delay_ == 300000) face();
+    else if(delay_ == 310000) face('R');
+    else if(delay_ == 340000) {
         face();
         delay_ = 0;
     }
@@ -148,27 +154,16 @@ void setup(void) {
     motorControlConfig();   // Motor init (Shield IO)
     accControlConfig();     // Accessories init (lights, horn, etc).
     mxConfig();             // Led matrix init
-    stop_();
+    move('S');
     face();
 }
 
 void loop(void) {
     comm = Serial.read();   // Get bluetooth/serial input
-    if (comm != -1) {       // If not "nothing", echo received input
+    if(comm != -1) {       // If not "nothing", echo received input
         Serial.print("\nReceived:\t");
         Serial.print(char(comm));
         Serial.print("\nAction:\t\t");
-    }
-    switch(comm) {
-        case 'X':
-            Serial.print("Entering autonomous mode");
-            autoMode = 1;
-            break;
-        case 'x':
-            Serial.print("Leaving autonomous mode");
-            stop_();
-            autoMode = 0;
-            break;
     }
     if(autoMode == 1) {
         char IR[4];
@@ -177,44 +172,43 @@ void loop(void) {
                                   digitalRead(IRSR));
 
         if(strcmp(IR, "111") == 0) {
-            forward();
+            move('F');
             faceAnim();
         } else if(strcmp(IR, "001") == 0 ||
                   strcmp(IR, "011") == 0 ||
                   strcmp(IR, "101") == 0) {
-            right();
-            face("right");
+            move('R');
+            face('R');
         } else if(strcmp(IR, "000") == 0 ||
                   strcmp(IR, "100") == 0 ||
                   strcmp(IR, "110") == 0) {
-            left();
-            face("left");
+            move('L');
+            face('R');
         }
     } else {
         faceAnim();
-        switch (comm) {
+        switch(comm) {
             case 'F':
                 Serial.print("Forward...");
-                forward();
-                face("front");
+                move('F');
                 break;
             case 'R':
                 Serial.print("Right...");
-                right();
-                face("right");
+                move('R');
+                face('R');
                 break;
             case 'L':
                 Serial.print("Left...");
-                left();
-                face("left");
+                move('L');
+                face('L');
                 break;
             case 'B':
                 Serial.print("Backward...");
-                backward();
+                move('B');
                 break;
             case 'S':
                 Serial.print("Stop!");
-                stop_();
+                move('S');
                 break;
             case 'W':
                 Serial.print("Front lights ON");
@@ -229,6 +223,15 @@ void loop(void) {
             case 'V':
             case 'v':
                 Serial.println("Not implemented yet.");
+                break;
+            case 'X':
+                Serial.print("Entering autonomous mode");
+                autoMode = 1;
+                break;
+            case 'x':
+                Serial.print("Leaving autonomous mode");
+                move('S');
+                autoMode = 0;
                 break;
         }
     }
