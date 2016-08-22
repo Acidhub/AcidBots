@@ -138,9 +138,12 @@ void face(String where = "front") {
 
 void faceAnim(void) {
     delay_++;
-    if(delay_ == 150000) {
-        face("blink");
-    } else if(delay_ == 160000) {
+    if(delay_ == 150000) face("blink");
+    else if(delay_ == 160000) face();
+    else if(delay_ == 220000) face("left");
+    else if(delay_ == 230000) face("front");
+    else if(delay_ == 232000) face("right");
+    else if(delay_ == 242000) {
         face();
         delay_ = 0;
     }
