@@ -92,67 +92,81 @@ void move(char direction, unsigned char speed = 255) {
     }
 }
 
-void lightsOn(void) {
-    digitalWrite(A0, HIGH);
-    digitalWrite(A1, HIGH);
-}
-
-void lightsOff(void) {
-    digitalWrite(A0, LOW);
-    digitalWrite(A1, LOW);
-}
-
-void face(char where = 'F') {
-    byte clear = B00000000;
-    byte eyes[3] = {B01100110, B11001100, B00110011};
-    byte mouth[4] = {B00111100, B01000010,  // Smile
-                     B00011000, B00100100}; // 'o'
-
-    mx.setColumn(0,0,clear);
-    mx.setColumn(0,1,mouth[0]);
-    mx.setColumn(0,2,mouth[1]);
-    mx.setColumn(0,3,clear);
-
-    switch(where) {
-        case 'F':
-            mx.setColumn(0,5,eyes[0]);
-            mx.setColumn(0,6,eyes[0]);
-            break;
-        case 'L':
-            mx.setColumn(0,5,eyes[1]);
-            mx.setColumn(0,6,eyes[1]);
-            break;
-        case 'R':
-            mx.setColumn(0,5,eyes[2]);
-            mx.setColumn(0,6,eyes[2]);
-            break;
-        case 'B':
-            mx.setColumn(0,5,eyes[0]);
-            mx.setColumn(0,6,clear);
-            break;
-        case 'O':
-            mx.setColumn(0,5,eyes[0]);
-            mx.setColumn(0,6,eyes[0]);
-            mx.setColumn(0,0,mouth[2]);
-            mx.setColumn(0,1,mouth[3]);
-            mx.setColumn(0,2,mouth[3]);
-            mx.setColumn(0,3,mouth[2]);
-            break;
+void lights(bool on) {
+    if(on == 1) {
+        digitalWrite(A0, HIGH);
+        digitalWrite(A1, HIGH);
+    } else {
+        digitalWrite(A0, LOW);
+        digitalWrite(A1, LOW);
     }
 }
 
-void faceAnim(int a = 1) {
+void face(const char what, const char where = 'N') {
+    byte clear = B00000000;
+    byte eyes[3] = {B01100110, B11001100, B00110011};
+    byte mouth[4] = {B00111100, B01000010, // Smile
+                     B00011000, B00100100};           // 'o'
+
+    switch(what) {
+        case 'M':
+            switch(where) {
+                case 'S':
+                    mx.setColumn(0,0,clear);
+                    mx.setColumn(0,1,mouth[0]);
+                    mx.setColumn(0,2,mouth[1]);
+                    mx.setColumn(0,3,mouth[1]);
+                break;
+                case 'O':
+                    mx.setColumn(0,0,mouth[2]);
+                    mx.setColumn(0,1,mouth[3]);
+                    mx.setColumn(0,2,mouth[3]);
+                    mx.setColumn(0,3,mouth[2]);
+                break;
+                case 'N':
+                    mx.setColumn(0,0,clear);
+                    mx.setColumn(0,1,mouth[0]);
+                    mx.setColumn(0,2,mouth[1]);
+                    mx.setColumn(0,3,clear);
+                break;
+            }
+        break;
+        case 'E':
+            switch(where) {
+                case 'N':
+                    mx.setColumn(0,5,eyes[0]);
+                    mx.setColumn(0,6,eyes[0]);
+                break;
+                case 'L':
+                    mx.setColumn(0,5,eyes[1]);
+                    mx.setColumn(0,6,eyes[1]);
+                break;
+                case 'R':
+                    mx.setColumn(0,5,eyes[2]);
+                    mx.setColumn(0,6,eyes[2]);
+                break;
+                case 'C':
+                    mx.setColumn(0,5,eyes[0]);
+                    mx.setColumn(0,6,clear);
+                break;
+            }
+        break;
+    }
+}
+
+
+void eyeAnim(void) {
     delay_++;
 
-    if(delay_ == 15000/a) face('B');
-    else if(delay_ == 16000/a) face();
-    else if(delay_ == 17000/a) face('B');
-    else if(delay_ == 18000/a) face();
-    else if(delay_ == 28000/a) face('L');
-    else if(delay_ == 30000/a) face();
-    else if(delay_ == 31000/a) face('R');
-    else if(delay_ == 34000/a) {
-        face();
+    if(delay_ == 150000) face('E', 'C');
+    else if(delay_ == 160000) face('E');
+    else if(delay_ == 170000) face('E', 'C');
+    else if(delay_ == 180000) face('E');
+    else if(delay_ == 280000) face('E', 'L');
+    else if(delay_ == 320000) face('E');
+    else if(delay_ == 340000) face('E', 'R');
+    else if(delay_ == 380000) {
+        face('E');
         delay_ = 0;
     }
 }
@@ -163,12 +177,12 @@ void setup(void) {
     motorControlConfig();   // Motor init (Shield IO)
     accControlConfig();     // Accessories init (lights, horn, etc).
     mxConfig();             // Led matrix init
-    move('S');
-    face();
+    face('M');              // Give a smile
 }
 
 void loop(void) {
     comm = Serial.read();   // Get bluetooth/serial input
+
     if(comm != -1) {       // If not "nothing", echo received input
         Serial.print("\nReceived:\t");
         Serial.print(char(comm));
@@ -183,6 +197,7 @@ void loop(void) {
         case 'x':
             Serial.print("Leaving autonomous mode");
             move('S');
+            face('M');
             autoMode = 0;
             break;
     }
@@ -195,19 +210,22 @@ void loop(void) {
         if((IRL==0&&IRM==0&&IRR==1) ||
            (IRL==0&&IRM==1&&IRR==1) ||
            (IRL==1&&IRM==0&&IRR==1)) {
-            move('R', 0);
-            face('O');
+            move('R', 150);
+            face('E', 'R');
+            face('M', 'O');
         } else if((IRL==0&&IRM==0&&IRR==0) ||
                   (IRL==1&&IRM==0&&IRR==0) ||
                   (IRL==1&&IRM==1&&IRR==0)) {
-            move('L', 0);
-            face('O');
+            move('L', 150);
+            face('E', 'L');
+            face('M', 'O');
         } else {
-            move('F', 0);
-            faceAnim(30);
+            move('F', 150);
+            face('E', 'C');
+            face('M', 'S');
         }
     } else {
-        faceAnim();
+        eyeAnim();
         switch(comm) {
             case 'F':
                 Serial.print("Forward...");
@@ -216,12 +234,10 @@ void loop(void) {
             case 'R':
                 Serial.print("Right...");
                 move('R');
-                face('R');
                 break;
             case 'L':
                 Serial.print("Left...");
                 move('L');
-                face('L');
                 break;
             case 'B':
                 Serial.print("Backward...");
@@ -233,11 +249,11 @@ void loop(void) {
                 break;
             case 'W':
                 Serial.print("Front lights ON");
-                lightsOn();
+                lights(1);
                 break;
             case 'w':
                 Serial.print("Front lights OFF");
-                lightsOff();
+                lights(0);
                 break;
             case 'U':
             case 'u':
