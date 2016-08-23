@@ -36,8 +36,9 @@
 #define mxDin A2
 
 char comm;                  // Serial input
-bool autoMode = 0;
+unsigned char speed;
 long delay_;                // Parallel delay
+bool autoMode = 0;
 LedControl mx=LedControl(mxDin,mxClock,mxCS,1);
 
 void accControlConfig(void) {// Accessories config (Shield IO)
@@ -64,7 +65,7 @@ void mxConfig(void) {
     mx.clearDisplay(0);     // clear
 }
 
-void move(char direction, unsigned char speed = 255) {
+void move(char direction, unsigned char speed) {
     analogWrite(E1, speed);
     analogWrite(E2, speed);
 
@@ -185,7 +186,7 @@ void loop(void) {
 
     if(comm != -1) {       // If not "nothing", echo received input
         Serial.print("\nReceived:\t");
-        Serial.print(char(comm));
+        Serial.print(comm);
         Serial.print("\nAction:\t\t");
     }
 
@@ -196,7 +197,7 @@ void loop(void) {
             break;
         case 'x':
             Serial.print("Leaving autonomous mode");
-            move('S');
+            move('S', 0);
             face('M');
             autoMode = 0;
             break;
@@ -229,23 +230,23 @@ void loop(void) {
         switch(comm) {
             case 'F':
                 Serial.print("Forward...");
-                move('F');
+                move('F', speed);
                 break;
             case 'R':
                 Serial.print("Right...");
-                move('R');
+                move('R', speed);
                 break;
             case 'L':
                 Serial.print("Left...");
-                move('L');
+                move('L', speed);
                 break;
             case 'B':
                 Serial.print("Backward...");
-                move('B');
+                move('B', speed);
                 break;
             case 'S':
                 Serial.print("Stop!");
-                move('S');
+                move('S', 0);
                 break;
             case 'W':
                 Serial.print("Front lights ON");
@@ -261,6 +262,15 @@ void loop(void) {
             case 'v':
                 Serial.println("Not implemented yet.");
                 break;
+            case 'q':
+                Serial.println("Full powahhhhhh!");
+                speed = 255;
+            default:
+                if(isDigit(comm)) {
+                    Serial.print("Speed: ");
+                    speed = map((int)comm - 48, 0, 10, 100, 255);
+                    Serial.println(speed);
+                }
         }
     }
 }
