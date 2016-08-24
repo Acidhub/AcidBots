@@ -124,6 +124,12 @@ void face(const char what, const char where = 'N') {
                     mx.setColumn(0,2,mouth[3]);
                     mx.setColumn(0,3,mouth[2]);
                 break;
+                case 'Z':
+                    mx.setColumn(0,0,clear);
+                    mx.setColumn(0,1,mouth[2]);
+                    mx.setColumn(0,2,clear);
+                    mx.setColumn(0,3,clear);
+                break;
                 case 'N':
                     mx.setColumn(0,0,clear);
                     mx.setColumn(0,1,mouth[0]);
@@ -159,17 +165,34 @@ void face(const char what, const char where = 'N') {
 void eyeAnim(void) {
     delay_++;
 
-    if(delay_ == 150000) face('E', 'C');
-    else if(delay_ == 160000) face('E');
-    else if(delay_ == 170000) face('E', 'C');
-    else if(delay_ == 180000) face('E');
-    else if(delay_ == 280000) face('E', 'L');
-    else if(delay_ == 320000) face('E');
-    else if(delay_ == 340000) face('E', 'R');
-    else if(delay_ == 380000) {
-        face('E');
-        delay_ = 0;
-    }
+    switch(delay_) {
+        case 150000:
+            face('E', 'C');
+            break;
+        case 160000:
+            face('E');
+            break;
+        case 170000:
+            face('E', 'C');
+            break;
+        case 180000:
+            face('E');
+            break;
+        case 380000:
+            face('E', 'L');
+            break;
+        case 400000:
+            face('E');
+            break;
+        case 420000:
+            face('E', 'R');
+            break;
+        case 440000:
+            face('E');
+            face('M');
+            delay_ = 0;
+            break;
+        }
 }
 
 void setup(void) {
@@ -178,7 +201,8 @@ void setup(void) {
     motorControlConfig();   // Motor init (Shield IO)
     accControlConfig();     // Accessories init (lights, horn, etc).
     mxConfig();             // Led matrix init
-    face('M');              // Give a smile
+    face('E', 'C');
+    face('M', 'Z');
 }
 
 void loop(void) {
