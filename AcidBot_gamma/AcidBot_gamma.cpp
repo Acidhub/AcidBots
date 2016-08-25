@@ -65,7 +65,7 @@ void mxConfig(void) {
     mx.clearDisplay(0);     // clear
 }
 
-void move(char direction, unsigned char speed) {
+void move(char direction, unsigned char speed = 255) {
     analogWrite(E1, speed);
     analogWrite(E2, speed);
 
@@ -78,11 +78,11 @@ void move(char direction, unsigned char speed) {
             digitalWrite(M1, HIGH); // Both left and right wheel move backward
             digitalWrite(M2, LOW);
             break;
-        case 'L':
+        case 'R':
             digitalWrite(M1, HIGH); // Left wheel moves forward
             digitalWrite(M2, HIGH); // Right wheel moves backward
             break;
-        case 'R':
+        case 'L':
             digitalWrite(M1, LOW);  // Left wheel moves backward
             digitalWrite(M2, LOW);  // Right wheel moves forward
             break;
@@ -104,7 +104,6 @@ void lights(bool on) {
 }
 
 void face(const char what, const char where = 'N') {
-    byte clear = B00000000;
     byte eyes[3] = {B01100110, B11001100, B00110011};
     byte mouth[4] = {B00111100, B01000010, // Smile
                      B00011000, B00100100};           // 'o'
@@ -113,7 +112,7 @@ void face(const char what, const char where = 'N') {
         case 'M':
             switch(where) {
                 case 'S':
-                    mx.setColumn(0,0,clear);
+                    mx.setColumn(0,0,0);
                     mx.setColumn(0,1,mouth[0]);
                     mx.setColumn(0,2,mouth[1]);
                     mx.setColumn(0,3,mouth[1]);
@@ -124,17 +123,17 @@ void face(const char what, const char where = 'N') {
                     mx.setColumn(0,2,mouth[3]);
                     mx.setColumn(0,3,mouth[2]);
                 break;
-                case 'Z':
-                    mx.setColumn(0,0,clear);
+                case 'C':
+                    mx.setColumn(0,0,0);
                     mx.setColumn(0,1,mouth[2]);
-                    mx.setColumn(0,2,clear);
-                    mx.setColumn(0,3,clear);
+                    mx.setColumn(0,2,0);
+                    mx.setColumn(0,3,0);
                 break;
                 case 'N':
-                    mx.setColumn(0,0,clear);
+                    mx.setColumn(0,0,0);
                     mx.setColumn(0,1,mouth[0]);
                     mx.setColumn(0,2,mouth[1]);
-                    mx.setColumn(0,3,clear);
+                    mx.setColumn(0,3,0);
                 break;
             }
         break;
@@ -154,7 +153,7 @@ void face(const char what, const char where = 'N') {
                 break;
                 case 'C':
                     mx.setColumn(0,5,eyes[0]);
-                    mx.setColumn(0,6,clear);
+                    mx.setColumn(0,6,0);
                 break;
             }
         break;
@@ -202,7 +201,7 @@ void setup(void) {
     accControlConfig();     // Accessories init (lights, horn, etc).
     mxConfig();             // Led matrix init
     face('E', 'C');
-    face('M', 'Z');
+    face('M', 'C');
 }
 
 void loop(void) {
@@ -210,17 +209,17 @@ void loop(void) {
 
     if(comm != -1) {       // If not "nothing", echo received input
         Serial.print("\nReceived:\t");
-        Serial.print(comm);
-        Serial.print("\nAction:\t\t");
+        Serial.println(comm);
+        Serial.print("Action:\t\t");
     }
 
     switch(comm) {
         case 'X':
-            Serial.print("Entering autonomous mode");
+            Serial.println("Entering autonomous mode");
             autoMode = 1;
             break;
         case 'x':
-            Serial.print("Leaving autonomous mode");
+            Serial.println("Leaving autonomous mode");
             move('S', 0);
             face('M');
             autoMode = 0;
@@ -232,20 +231,27 @@ void loop(void) {
         char IRM = digitalRead(IRSM);
         char IRR = digitalRead(IRSR);
 
-        if((IRL==0&&IRM==0&&IRR==1) ||
-           (IRL==0&&IRM==1&&IRR==1) ||
-           (IRL==1&&IRM==0&&IRR==1)) {
-            move('R', 150);
+        if((IRL==0&&IRM==1&&IRR==1) ||
+           (IRL==0&&IRM==0&&IRR==1)) {
+            move('R');
             face('E', 'R');
             face('M', 'O');
-        } else if((IRL==0&&IRM==0&&IRR==0) ||
-                  (IRL==1&&IRM==0&&IRR==0) ||
-                  (IRL==1&&IRM==1&&IRR==0)) {
-            move('L', 150);
+        } else if((IRL==1&&IRM==1&&IRR==0) ||
+                  (IRL==1&&IRM==0&&IRR==0)) {
+            move('L');
             face('E', 'L');
             face('M', 'O');
+        } else if((IRL==1&&IRM==0&&IRR==1) ||
+                  (IRL==0&&IRM==1&&IRR==0)) {
+            move('B');
+            face('E');
+            face('M', 'O');
+            delay(2000);
+            move('R');
+            face('M', 'S');
+            delay(1000);
         } else {
-            move('F', 150);
+            move('F');
             face('E', 'C');
             face('M', 'S');
         }
@@ -253,31 +259,31 @@ void loop(void) {
         eyeAnim();
         switch(comm) {
             case 'F':
-                Serial.print("Forward...");
+                Serial.println("Forward...");
                 move('F', speed);
                 break;
             case 'R':
-                Serial.print("Right...");
+                Serial.println("Right...");
                 move('R', speed);
                 break;
             case 'L':
-                Serial.print("Left...");
+                Serial.println("Left...");
                 move('L', speed);
                 break;
             case 'B':
-                Serial.print("Backward...");
+                Serial.println("Backward...");
                 move('B', speed);
                 break;
             case 'S':
-                Serial.print("Stop!");
+                Serial.println("Stop!");
                 move('S', 0);
                 break;
             case 'W':
-                Serial.print("Front lights ON");
+                Serial.println("Front lights ON");
                 lights(1);
                 break;
             case 'w':
-                Serial.print("Front lights OFF");
+                Serial.println("Front lights OFF");
                 lights(0);
                 break;
             case 'U':
