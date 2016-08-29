@@ -14,6 +14,11 @@ Simple bluetooth / serial controlled car with a DVD as chassi and an Arduino UNO
 * Glue :trollface:
 
 
+#### Wiring:
+
+![AcidBot beta](beta_bb.png)
+
+
 #### Final result:
 
 ![AcidBot beta](http://acidhub.click/imghp/Arduino/AcidBot_beta.png)
